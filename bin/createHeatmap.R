@@ -71,12 +71,27 @@ annoColors <- list(
 ################################################
 ################################################
 ## Create a basic heatmap##
+
+# Normalize the data using z-score normalization
+normalizedData <- scale(sampleData)
+
+# Generate basic heatmap
+pdf(paste0("basic_heatmap_", outprefix, ".pdf"), width=8, height=6)
+pheatmap(
+  normalizedData,
+  clustering_distance_rows = "euclidean",
+  clustering_distance_cols = "euclidean",
+  clustering_method = "ward.D",
+  fontsize_row = 6,
+  fontsize_col = 8,
+  color = colorRampPalette(rev(brewer.pal(n=9, name="RdBu")))(100)
+)
+dev.off()
+
 ################################################
 ################################################
 
+## Create complex heatmap
 
-################################################
-################################################
-## Create a basic heatmap##
 ################################################
 ################################################
