@@ -18,6 +18,11 @@ process FASTQC {
     when:
     task.ext.when == null || task.ext.when
 
+    // Predefined resource allocation
+    cpus = { check_max( 6 * task.attempt, 'cpus' ) }
+    memory = { check_max( 36.GB * task.attempt, 'memory' ) }
+    time = { check_max( 8.h * task.attempt, 'time' ) }
+
     script:
     def args = task.ext.args ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
