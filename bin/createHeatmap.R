@@ -91,7 +91,80 @@ dev.off()
 ################################################
 ################################################
 
-## Create complex heatmap
+# Create complex heatmap
+
+# Replace NA, NaN, Inf with zero to prevent errors
+normalizedData[is.na(normalizedData)] <- 0
+normalizedData[is.nan(normalizedData)] <- 0
+normalizedData[is.infinite(normalizedData)] <- 0
+
+low_value <- min(normalizedData, na.rm = TRUE)
+high_value <- max(normalizedData, na.rm = TRUE)
+
+# Define the number of colors
+num_colors <- 100
+color_palette <- colorRampPalette(rev(brewer.pal(n = 9, name = "RdBu")))(num_colors)
+
+# Generate a break sequence
+# Discrete sequence was not working
+breaks_seq <- seq(low_value, high_value, length.out = length(color_palette) + 1)
+
+## MAP GENE FUNCTIONS TO ROW ANNOTATIONS 
+gene_function_annotation <- geneFunctions$gene_functions[match(rownames(sampleData), rownames(geneFunctions))]
+
+# Replace NA values with "Unknown"
+gene_function_annotation[is.na(gene_function_annotation)] <- "Unknown"
+
+# Convert to factor
+row_annotation <- data.frame(gene_functions = factor(gene_function_annotation))
+rownames(row_annotation) <- rownames(sampleData)  
+
+# Redefine default colors for gene functions
+gene_function_colors <- c(
+  "Oxidative_phosphorylation" = "#F46D43",
+  "Cell_cycle" = "#708238",
+  "Immune_regulation" = "#9E0142",
+  "Signal_transduction" = "beige",
+  "Transcription" = "violet",
+  "Unknown" = "gray"  # Ensure 'Unknown' has a color
+)
+
+# Redefine annotation colors
+annoColors <- list(
+  gene_functions = gene_function_colors,
+  Group = c("Disease" = "darkgreen", "Control" = "blueviolet"),
+  Lymphocyte_count = brewer.pal(5, 'PuBu')
+)
+
+## GENERATE THE HEATMAP
+
+pdf(paste0("complex_heatmap_", outprefix, ".pdf"), width=10, height=8)
+
+pheatmap(
+  normalizedData,  
+  clustering_distance_rows = "euclidean",
+  clustering_distance_cols = "euclidean",
+  clustering_method = "ward.D",
+  fontsize_row = 6,
+  fontsize_col = 8,
+  color = color_palette,
+  
+  # Annotations
+  annotation_col = annoData,  
+  annotation_row = row_annotation,  
+  annotation_colors = annoColors,  
+  
+  # Hide row names but show column names
+  show_rownames = FALSE,
+  show_colnames = TRUE,
+  annotation_names_row = FALSE,
+  annotation_names_col = FALSE,
+  
+  # Set breaks
+  breaks = breaks_seq
+)
+
+dev.off()
 
 ################################################
 ################################################
